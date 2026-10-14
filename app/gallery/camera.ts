@@ -1,4 +1,4 @@
-import { ROOMS, doorBetween, type Pose, type RoomId, type Vec3 } from "./plan.ts";
+import type { Pose, Vec3 } from "./plan.ts";
 
 const cr = (a: number, b: number, c: number, d: number, t: number) => {
   const t2 = t * t, t3 = t2 * t;
@@ -18,23 +18,11 @@ export function poseAt(s: Pose[], u: number): Pose {
   return { pos: crv(a.pos, b.pos, c.pos, d.pos, t), look: crv(a.look, b.look, c.look, d.look, t), fov: b.fov + (c.fov - b.fov) * t };
 }
 
-const centre = (id: RoomId) => { const r = ROOMS[id]; return [(r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2]; };
-
-/** A walk from one pose to another through the doorways of `rooms` (as returned by `route`). */
-export function walk(from: Pose, rooms: RoomId[], to: Pose): Pose[] {
-  const out: Pose[] = [from];
-  for (let i = 0; i + 1 < rooms.length; i++) {
-    const d = doorBetween(rooms[i], rooms[i + 1]);
-    if (!d) continue;
-    const r = ROOMS[rooms[i]];
-    const [ax, az] = centre(rooms[i]), [bx, bz] = centre(rooms[i + 1]);
-    // Doors on an east/west wall are crossed along x; on a north/south wall, along z.
-    const alongX = d.at[0] === r.x0 || d.at[0] === r.x1;
-    const dir: [number, number] = alongX ? [Math.sign(bx - ax), 0] : [0, Math.sign(bz - az)];
-    const at = (k: number): Vec3 => [d.at[0] + dir[0] * k, 1.7, d.at[2] + dir[1] * k];
-    const ahead = (k: number): Vec3 => [d.at[0] + dir[0] * (k + 10), 1.8, d.at[2] + dir[1] * (k + 10)];
-    out.push({ pos: at(-3), look: ahead(-3), fov: 50 }, { pos: at(0), look: ahead(0), fov: 52 }, { pos: at(3), look: ahead(3), fov: 50 });
-  }
-  out.push(to);
-  return out;
+/** A crane move between two shots: up and back out, around the machine, then in. */
+export function flight(from: Pose, to: Pose): Pose[] {
+  const mid = from.pos.map((v, i) => (v + to.pos[i]) / 2) as Vec3;
+  const r = Math.max(Math.hypot(mid[0], mid[2]), 1);
+  const out = Math.max(13 / r, 1); // never cut through the monitor
+  const crane: Vec3 = [mid[0] * out, Math.max(mid[1], 4) + 2.5, mid[2] * out];
+  return [from, { pos: crane, look: [0, 2.6, 0], fov: Math.max(from.fov, to.fov) + 6 }, to];
 }

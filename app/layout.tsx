@@ -3,7 +3,7 @@ import { Archivo } from "next/font/google";
 import localFont from "next/font/local";
 import { CookieBanner } from "./components/CookieBanner";
 import { Gallery } from "./gallery/Gallery";
-import { Dock } from "./ui/Dock";
+import { NavBar } from "./ui/NavBar";
 import { Motion } from "./ui/Motion";
 import "./globals.css";
 
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070605",
+  themeColor: "#0a0a0a",
   width: "device-width",
   initialScale: 1,
 };
@@ -89,7 +89,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <a href="#main" className="skip-link">Skip to content</a>
         <Gallery />
         {children}
-        <Dock />
+        <NavBar />
         <Motion />
         <CookieBanner />
       </body>

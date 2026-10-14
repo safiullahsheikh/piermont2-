@@ -4,15 +4,15 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Lenis from "lenis";
-import { roomForPath } from "./plan.ts";
-import { scroll, store, useGallery } from "./store.ts";
+import { sceneForPath } from "./plan.ts";
+import { screen, scroll, store, useGallery } from "./store.ts";
 import { detectTier } from "./tier.ts";
 
 const Scene = dynamic(() => import("./three/Scene"), { ssr: false });
 
 /**
- * The persistent gallery: one canvas behind every page. Pages tag their sections with
- * `data-station`; this turns scroll into a continuous station index for the camera.
+ * The persistent machine: one canvas behind every page. Pages tag their sections with
+ * `data-station` (camera shots) and `data-screen` (what plays on the CRT).
  */
 export function Gallery() {
   const path = usePathname();
@@ -20,7 +20,7 @@ export function Gallery() {
   const [mount, setMount] = useState(false);
 
   // Route → room. The camera notices the change and walks there.
-  useEffect(() => { store.set({ room: roomForPath(path), menu: false }); }, [path]);
+  useEffect(() => { store.set({ scene: sceneForPath(path), menu: false }); }, [path]);
 
   // Decide on live 3D once, after first paint, so the text is always the LCP.
   useEffect(() => {
@@ -42,11 +42,18 @@ export function Gallery() {
       lenis?.raf(t);
       const els = document.querySelectorAll<HTMLElement>("main [data-station]");
       const mid = innerHeight / 2;
-      let u = 0;
+      let u = 0, src = "";
       els.forEach((el, i) => {
         const r = el.getBoundingClientRect();
         if (r.top <= mid) u = i - 0.5 + Math.min((mid - r.top) / Math.max(r.height, 1), 1);
+        if (r.top <= mid && r.bottom > mid) src = el.dataset.screen ?? "";
       });
+      // Whatever the section in the middle of the screen asks to show, plays on the CRT.
+      document.querySelectorAll<HTMLElement>("main [data-screen]:not([data-station])").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top <= mid && r.bottom > mid) src = el.dataset.screen!;
+      });
+      screen.src = src;
       scroll.stations = Math.max(els.length, 1);
       scroll.u = Math.min(Math.max(u, 0), scroll.stations - 1);
       scroll.velocity = scrollY - last;

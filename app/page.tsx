@@ -1,115 +1,141 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { LazyVideo } from "./components/LazyVideo";
 import { FEATURED } from "./content/featured";
-import { projectsIn, WINGS } from "./content/wings";
+import { POSTS } from "./content/posts";
+import { PROJECTS } from "./content/projects";
+import { SERVICES } from "./content/services";
 import { ORGANIZATION_LD } from "./site";
 import { Collection } from "./ui/Collection";
 import { Footer } from "./ui/Footer";
+import { PostCard, ProjectTile } from "./ui/Tiles";
+import { Voices } from "./ui/Voices";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const pad = (n: number) => String(n).padStart(2, "0");
+const featured = new Set(FEATURED.map((f) => f.slug));
+const MORE = PROJECTS.filter((p) => !featured.has(p.slug)).slice(0, 7);
+const BENTO = ["tile--xl", "", "", "tile--tall", "tile--wide", "", ""];
 
-export default function Atrium() {
+export default function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANIZATION_LD).replace(/</g, "\\u003c") }} />
-      <main id="main" className="room atr">
-        {/* 0 · Hero */}
-        <section className="atr-hero" data-station aria-labelledby="atr-title">
-          <p className="k-kicker atr-kicker">Piermont Studios · Stage 01 · Sheridan / London</p>
-          <h1 id="atr-title" className="atr-title">
-            <span className="atr-word">PIERMONT</span>
-            <span className="atr-punch">Look closer. It&rsquo;s all ours.</span>
+      <main id="main" className="page home">
+        {/* 0 · Hero: the headline on the left, the machine on the right, typing to itself */}
+        <section className="hero" data-station aria-labelledby="hero-title">
+          <p className="kicker hero-kicker"><span className="rec" aria-hidden="true" />Piermont Studios · Creative agency · Sheridan / London</p>
+          <h1 id="hero-title" className="hero-title">
+            <span className="line"><span>We strategize,</span></span>
+            <span className="line"><span>build <em>&amp;</em> promote.</span></span>
           </h1>
-          <p className="atr-lede">
-            A creative studio for brands, products and campaigns. Every piece in this building is work we made.
-          </p>
-          <p className="atr-cue" aria-hidden="true"><span>Scroll to walk in</span></p>
+          <p className="hero-lede">Brands, websites, products and campaigns for teams who&rsquo;d rather be remembered than merely seen.</p>
+          <div className="hero-actions">
+            <a href="#work" className="btn btn--accent">See the work</a>
+            <Link href="/contact" className="btn">Start a project</Link>
+          </div>
+          <dl className="hero-stats">
+            <div><dt>Projects shipped</dt><dd>{PROJECTS.length}+</dd></div>
+            <div><dt>Disciplines</dt><dd>06</dd></div>
+            <div><dt>Offices</dt><dd>US · UK</dd></div>
+          </dl>
+          <p className="hero-cue" aria-hidden="true">Scroll into the screen</p>
         </section>
 
-        {/* 1 · Manifesto */}
-        <section className="atr-manifesto" data-station aria-label="Manifesto">
-          <p className="k-kicker" data-reveal>House rules</p>
-          <ol className="atr-rules">
-            <li data-reveal><span>01</span>Strategy you can stand in front of.</li>
-            <li data-reveal><span>02</span>Design that holds a wall.</li>
-            <li data-reveal><span>03</span>Code that never creaks.</li>
-          </ol>
+        {/* 1 · Showreel: the camera goes through the glass */}
+        <section className="reel" data-station data-screen="/video.mp4" aria-label="Showreel">
+          <div className="reel-cap" data-reveal>
+            <p className="kicker">Showreel · 2026</p>
+            <p className="reel-title">Behind the pixels.</p>
+          </div>
         </section>
 
-        {/* 2–7 · Out of the light: one featured piece per wing, rising from the Lightbox */}
-        {FEATURED.map((f, i) => (
-          <section key={f.slug} id={`piece-${i + 1}`} className="atr-piece" data-station aria-labelledby={`piece-${i + 1}-t`}>
-            <article className="atr-label k-card" data-reveal>
-              <p className="k-kicker">{i === 0 ? "Out of the light · " : ""}No. {pad(i + 1)} / {pad(FEATURED.length)} · {f.wing.title}</p>
-              <h2 id={`piece-${i + 1}-t`} className="atr-client">{f.client}</h2>
-              <p className="atr-tagline">{f.tagline}</p>
-              <dl className="atr-meta">
-                <div><dt>Medium</dt><dd>{f.service}</dd></div>
-                <div><dt>Field</dt><dd>{f.category}</dd></div>
-              </dl>
-              <div className="atr-actions">
-                <Link href={`/work/${f.slug}`} className="k-btn k-btn--accent" data-magnetic>View the exhibit</Link>
-                <nav className="atr-step" aria-label="Featured pieces">
-                  <a href={`#piece-${i}`} className="k-icon" aria-label="Previous piece" aria-disabled={i === 0 || undefined} tabIndex={i === 0 ? -1 : undefined}>←</a>
-                  <a href={`#piece-${i + 2}`} className="k-icon" aria-label="Next piece" aria-disabled={i === FEATURED.length - 1 || undefined} tabIndex={i === FEATURED.length - 1 ? -1 : undefined}>→</a>
-                </nav>
-              </div>
-            </article>
-          </section>
-        ))}
+        {/* 2–7 · Selected work: each project plays on the machine */}
+        <div id="work" className="work">
+          {FEATURED.map((f, i) => (
+            <section key={f.slug} className="feat" data-station data-screen={f.video} aria-labelledby={`feat-${i}`}>
+              <article className="feat-card" data-reveal>
+                <p className="kicker">Selected work · {pad(i + 1)} / {pad(FEATURED.length)}</p>
+                <h2 id={`feat-${i}`} className="feat-client">{f.client}</h2>
+                <p className="feat-tagline">{f.tagline}</p>
+                <p className="feat-intro">{f.intro.split(". ").slice(0, 2).join(". ")}.</p>
+                <dl className="feat-meta">
+                  <div><dt>Service</dt><dd>{f.wing.title}</dd></div>
+                  <div><dt>Industry</dt><dd>{f.category}</dd></div>
+                </dl>
+                <Link href={`/work/${f.slug}`} className="btn btn--accent">View case study</Link>
+              </article>
+            </section>
+          ))}
+        </div>
 
-        {/* 8 · The wings, as a bento */}
-        <section className="atr-wings" data-station aria-labelledby="atr-wings-t">
-          <header className="atr-head" data-reveal>
-            <p className="k-kicker">The wings</p>
-            <h2 id="atr-wings-t" className="k-punch">Every discipline, framed.</h2>
+        {/* 8 · More work: a bento of real projects, each playing on hover */}
+        <section className="more" data-station aria-labelledby="more-title">
+          <header className="head">
+            <p className="kicker">The archive</p>
+            <h2 id="more-title" className="h2">More from the studio.</h2>
+            <Link href="/work" className="btn">All {PROJECTS.length} projects</Link>
           </header>
-          <ul className="bento">
-            {WINGS.map((w, i) => (
-              <li key={w.slug} className={`bento-tile${i === 0 || i === 3 ? " bento-tile--wide" : ""}`} data-reveal>
-                <Link href={`/services/${w.slug}`} className="bento-link">
-                  <span className="bento-no">Wing {pad(i + 1)} · {pad(projectsIn(w).length)} works</span>
-                  <span className="bento-title">{w.title}</span>
-                  <span className="bento-punch">{w.punch}</span>
-                  <span className="bento-arrow" aria-hidden="true">→</span>
-                </Link>
+          <div className="bento">
+            {MORE.map((p, i) => <ProjectTile key={p.slug} p={p} size={BENTO[i]} />)}
+          </div>
+        </section>
+
+        {/* 9 · Services: six disciplines, each with its own loop */}
+        <section className="svc" data-station aria-labelledby="svc-title">
+          <header className="head">
+            <p className="kicker">What we do</p>
+            <h2 id="svc-title" className="h2">Six disciplines. One team.</h2>
+            <Link href="/services" className="btn">All services</Link>
+          </header>
+          <ul className="svc-grid">
+            {SERVICES.map((s) => (
+              <li key={s.title} className="svc-card" data-reveal data-screen={s.video ?? undefined}>
+                <span className="svc-media">
+                  {s.video ? <LazyVideo src={s.video} className="tile-video is-on" /> : <Image src={s.image!} alt="" fill sizes="(max-width: 760px) 100vw, 33vw" />}
+                </span>
+                <span className="svc-top"><span className="kicker">{s.tag}</span><span className="svc-no">{s.index}</span></span>
+                <h3 className="svc-title">{s.title}</h3>
+                <p className="svc-desc">{s.descriptionLines.join(" ")}</p>
+                <ul className="svc-items">{s.items.map((it) => <li key={it}>{it}</li>)}</ul>
               </li>
             ))}
-            <li className="bento-tile bento-tile--accent" data-reveal>
-              <Link href="/studio" className="bento-link">
-                <span className="bento-no">Room 05</span>
-                <span className="bento-title">The Workshop</span>
-                <span className="bento-punch">Where the work gets its nerve.</span>
-                <span className="bento-arrow" aria-hidden="true">→</span>
-              </Link>
-            </li>
-            <li className="bento-tile bento-tile--dark" data-reveal>
-              <Link href="/journal" className="bento-link">
-                <span className="bento-no">Room 06</span>
-                <span className="bento-title">Reading Room</span>
-                <span className="bento-punch">Notes from the studio floor.</span>
-                <span className="bento-arrow" aria-hidden="true">→</span>
-              </Link>
-            </li>
           </ul>
         </section>
 
-        {/* 9 · The Collection */}
-        <section className="atr-collection" data-station aria-labelledby="atr-col-t">
-          <header className="atr-head" data-reveal>
-            <p className="k-kicker">The permanent collection</p>
-            <h2 id="atr-col-t" className="k-punch">Hung in good company.</h2>
+        {/* 10 · Voices */}
+        <section className="vox" data-station aria-labelledby="vox-title">
+          <header className="head">
+            <p className="kicker">Client voices</p>
+            <h2 id="vox-title" className="h2">Five stars, in their words.</h2>
           </header>
-          <Collection />
+          <Voices />
         </section>
 
-        {/* 10 · Call */}
-        <section className="atr-call" data-station aria-labelledby="atr-call-t">
-          <p className="k-kicker" data-reveal>Next room</p>
-          <h2 id="atr-call-t" className="atr-call-title" data-reveal>The empty wall<br />is yours.</h2>
-          <Link href="/contact" className="k-btn k-btn--accent k-btn--lg" data-magnetic data-reveal>Start a project</Link>
+        {/* 11 · Clients + journal */}
+        <section className="cli" data-station aria-labelledby="cli-title">
+          <header className="head">
+            <p className="kicker">Trusted by teams at</p>
+            <h2 id="cli-title" className="h2">Names you know.</h2>
+          </header>
+          <Collection />
+          <header className="head head--journal">
+            <p className="kicker">Journal</p>
+            <h2 className="h2">Notes from the studio.</h2>
+            <Link href="/journal" className="btn">Read the journal</Link>
+          </header>
+          <div className="posts">
+            {POSTS.slice(0, 3).map((p, i) => <PostCard key={p.slug} post={p} lead={i === 0} />)}
+          </div>
+        </section>
+
+        {/* 12 · Call */}
+        <section className="call" data-station data-screen="/OtherAssets/contact.mp4" aria-labelledby="call-title">
+          <p className="kicker">Your turn</p>
+          <h2 id="call-title" className="call-title">Press any key<br />to begin.</h2>
+          <Link href="/contact" className="btn btn--accent btn--lg">Start a project</Link>
         </section>
       </main>
       <Footer />

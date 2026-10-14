@@ -33,19 +33,5 @@ export function Motion() {
     return () => els.forEach((el) => { el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); });
   }, [path]);
 
-  // Glass surfaces: a warm light follows the pointer across whichever one it is over.
-  useEffect(() => {
-    if (!matchMedia("(pointer: fine)").matches) return;
-    const move = (e: PointerEvent) => {
-      const el = (e.target as Element).closest?.<HTMLElement>(".k-card, .bento-link, .menu-card, .foot-tile");
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      el.style.setProperty("--mx", `${e.clientX - r.left}px`);
-      el.style.setProperty("--my", `${e.clientY - r.top}px`);
-    };
-    addEventListener("pointermove", move, { passive: true });
-    return () => removeEventListener("pointermove", move);
-  }, []);
-
   return null;
 }

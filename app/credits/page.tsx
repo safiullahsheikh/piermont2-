@@ -13,16 +13,16 @@ const ASSETS = [
 export default function Credits() {
   return (
     <>
-      <main id="main" className="room credits">
+      <main id="main" className="page desk">
         <section className="desk-hero">
-          <p className="k-kicker">Colophon</p>
-          <h1 className="k-punch">Credits.</h1>
+          <p className="kicker">Colophon</p>
+          <h1 className="h2">Credits.</h1>
           <p className="desk-lede">Every exhibit in this building is Piermont work. The building itself borrows a few free materials, listed here with thanks.</p>
         </section>
         <section className="desk-lines">
           {ASSETS.map((a) => (
-            <a key={a.asset} href={a.url} target="_blank" rel="noopener noreferrer" className="k-card desk-line">
-              <span className="k-kicker">{a.author} · {a.licence}</span>{a.asset}
+            <a key={a.asset} href={a.url} target="_blank" rel="noopener noreferrer" className="desk-line">
+              <span className="kicker">{a.author} · {a.licence}</span>{a.asset}
             </a>
           ))}
         </section>

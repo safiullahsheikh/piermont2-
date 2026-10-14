@@ -1,17 +1,16 @@
 import { useSyncExternalStore } from "react";
-import type { RoomId } from "./plan.ts";
+import type { SceneId } from "./plan.ts";
 
 export type Tier = "high" | "low";
 export type GalleryState = {
   phase: "idle" | "loading" | "ready" | "fallback";
-  entered: boolean;
   sound: boolean;
   menu: boolean;
-  room: RoomId;
+  scene: SceneId;
   tier: Tier;
 };
 
-let state: GalleryState = { phase: "idle", entered: false, sound: false, menu: false, room: "atrium", tier: "high" };
+let state: GalleryState = { phase: "idle", sound: false, menu: false, scene: "home", tier: "high" };
 const subs = new Set<() => void>();
 
 export const store = {
@@ -33,3 +32,6 @@ export const store = {
 export const scroll = { u: 0, stations: 1, velocity: 0 };
 
 export const useGallery = () => useSyncExternalStore(store.subscribe, store.get, store.get);
+
+/** What the CRT is showing: the active section's `data-screen`, or the scene's own loop. */
+export const screen = { src: "" };

@@ -1,112 +1,69 @@
-// The Kunsthalle floor plan: one source of truth for the 3D building, the camera and the menu's floor plan.
-// Metres; y is up, −z is north. The atrium's north wall holds the Void, so nothing is built north of it.
+// Every page is a shot of the same machine. Units: the monitor is 4 wide; y is up; the screen faces +z.
+// One source of truth for the camera, the nav and the menu.
 
 export type Vec3 = [number, number, number];
 export type Pose = { pos: Vec3; look: Vec3; fov: number };
-export type RoomId = "atrium" | "gallery" | "exhibit" | "wings" | "studio" | "reading" | "desk";
-export type Room = {
-  id: RoomId;
-  no: number;
+export type SceneId = "home" | "work" | "project" | "services" | "studio" | "journal" | "contact";
+export type Scene = {
+  id: SceneId;
   label: string;
-  punch: string;
   href: string;
-  x0: number; z0: number; x1: number; z1: number; h: number;
+  /** Loop shown on the screen when no section asks for anything else. */
+  screen: string;
   stations: Pose[];
 };
-/** A doorway: `at` is the centre of the opening at floor level, on the wall the two rooms share. */
-export type Door = { a: RoomId; b: RoomId; at: Vec3; w: number; h: number };
 
-const EYE = 1.7;
-const p = (pos: Vec3, look: Vec3, fov = 45): Pose => ({ pos, look, fov });
+const p = (pos: Vec3, look: Vec3, fov = 32): Pose => ({ pos, look, fov });
 
-/** The Void: a recessed field of Klein blue set into the atrium's north wall. */
-export const VOID = { x: 0, y0: 2.2, y1: 12.2, w: 14, z: -15, depth: 2 } as const;
-const VOID_MID: Vec3 = [VOID.x, (VOID.y0 + VOID.y1) / 2, VOID.z];
+/** Where the CRT sits: centre, size and the plane of the glass. */
+export const SCREEN = { x: 0, y: 3.02, w: 3.04, h: 2.3, z: 1.08 } as const;
+export const KEYBOARD = { z: 3.15 } as const;
 
-export const ROOMS: Record<RoomId, Room> = {
-  atrium: {
-    id: "atrium", no: 1, label: "Atrium", punch: "Look closer. It's all ours.", href: "/",
-    x0: -15, z0: -15, x1: 15, z1: 15, h: 18,
+export const SCENES: Record<SceneId, Scene> = {
+  home: {
+    id: "home", label: "Home", href: "/", screen: "/OtherAssets/pcVideo.mp4",
     stations: [
-      p([0, EYE + 0.4, 12.5], [0, 7.4, -15], 50), // 0 hero: the whole hall, the Void dead ahead
-      p([-5, 3.2, 6], [1, 7.2, -15], 46), // 1 manifesto: drifting in
-      ...[-1.2, 1.2, -0.8, 0.9, -1.1, 1].map((dx, i) =>
-        p([dx * 2.2, 5.6 + (i % 2) * 0.4, 3], [dx * 1.1, 6.6, -15], 44)), // 2–7 featured: the piece framed by the Lightbox, studio around it
-      p([9, 11.5, 11], [-2, 5, -13], 52), // 8 bento: high up, looking down across the hall
-      p([10, 9, 8], [-4, 3, -10], 50), // 9 collection + achievements
-      p([0, 3.4, -8], [0, 2.6, 15], 48), // 10 CTA: turn back toward the front desk
+      p([3.2, 3.8, 14], [-3.4, 2.5, 0], 30), // 0 hero: the machine on the right, the headline on the left
+      p([0, SCREEN.y, 2.9], [0, SCREEN.y, 0], 46), // 1 showreel: through the glass
+      ...[0, 1, 2, 3, 4, 5].map((i) => p([-3.4 - (i % 2) * 0.6, 3.0 + (i % 3) * 0.25, 10 + (i % 2) * 0.6], [2.4, 2.7, 0], 30)), // 2–7 selected work, on its screen
+      p([-9, 9.5, 11], [0.5, 1.6, 0], 36), // 8 more work: high and wide
+      p([0.6, 7.6, 8.2], [0, 0.4, 2.6], 34), // 9 services: over the keyboard
+      p([8.6, 3.6, 3.2], [0, 2.4, 0.4], 30), // 10 voices: in profile
+      p([-6.5, 6.5, -6.5], [0, 2.4, 0], 32), // 11 clients + journal: from behind, light spilling forward
+      p([0, 2.8, 10.5], [0, 2.6, 0], 32), // 12 call: square on
     ],
   },
-  desk: {
-    id: "desk", no: 7, label: "Front Desk", punch: "Your piece goes here.", href: "/contact",
-    x0: -8, z0: 15, x1: 8, z1: 30, h: 6,
-    stations: [p([0, EYE, 17.5], [0, 1.4, 28]), p([-4, 2.2, 20], [2, 1.2, 28]), p([3, 2.4, 25], [-3, 1.6, 17])],
+  work: {
+    id: "work", label: "Work", href: "/work", screen: "/video.mp4",
+    stations: [p([0, 4.2, 15], [0, 2.8, 0], 40), p([0, 9, 13], [0, 2, 0], 42)],
   },
-  gallery: {
-    id: "gallery", no: 2, label: "Long Gallery", punch: "Twenty-five rooms of proof.", href: "/work",
-    x0: 15, z0: -6, x1: 75, z1: 6, h: 8,
-    stations: [p([18, EYE, 0], [72, 2.4, 0], 50), p([34, EYE, 2.5], [44, 2.2, -6]), p([52, EYE, -2.5], [62, 2.2, 6]), p([70, EYE, 0], [75, 2.6, 0])],
+  project: {
+    id: "project", label: "Project", href: "/work", screen: "/video.mp4",
+    stations: [p([0, SCREEN.y, 6.2], [0, SCREEN.y, 0], 34), p([-4.5, 3.4, 8], [0.8, 2.8, 0], 32), p([4.5, 3, 7.5], [-0.8, 2.6, 0], 32)],
   },
-  exhibit: {
-    id: "exhibit", no: 3, label: "Exhibit Room", punch: "One piece. Full attention.", href: "/work",
-    x0: 75, z0: -10, x1: 95, z1: 10, h: 9,
-    stations: [p([78, EYE, 0], [95, 3.4, 0]), p([86, 2.4, 4], [95, 3.2, -1]), p([90, 2, -6], [80, 2.4, 6])],
-  },
-  wings: {
-    id: "wings", no: 4, label: "The Wings", punch: "Every discipline, framed.", href: "/services",
-    x0: -51, z0: -9, x1: -15, z1: 9, h: 8,
-    stations: [p([-18, EYE, 0], [-51, 2.4, 0], 50), p([-30, EYE, 4], [-40, 2.2, -9]), p([-46, EYE, -4], [-36, 2.2, 9])],
+  services: {
+    id: "services", label: "Services", href: "/services", screen: "/OtherAssets/BrandIdentityVideo.mp4",
+    stations: [p([0, 3.6, 13], [0, 2.4, 2], 34), p([0, 6.5, 9], [0, 1, 3], 34)],
   },
   studio: {
-    id: "studio", no: 5, label: "The Workshop", punch: "Where the work gets its nerve.", href: "/studio",
-    x0: 15, z0: 6, x1: 35, z1: 26, h: 6,
-    stations: [p([25, EYE, 9], [25, 1.6, 26]), p([19, 2.4, 16], [32, 1.2, 22]), p([31, 2, 23], [20, 1.4, 10])],
+    id: "studio", label: "Studio", href: "/studio", screen: "/video.mp4",
+    stations: [p([0, 3, 9], [0, 3.4, 0], 52), p([0, 1.6, 6], [0, 5, -4], 58), p([6, 4, 6], [0, 3, 0], 46)],
   },
-  reading: {
-    id: "reading", no: 6, label: "Reading Room", punch: "Notes from the studio floor.", href: "/journal",
-    x0: -35, z0: 9, x1: -15, z1: 29, h: 6,
-    stations: [p([-25, EYE, 12], [-25, 1.8, 29]), p([-31, 2.2, 20], [-18, 1.4, 25]), p([-19, 2, 26], [-30, 1.6, 12])],
+  journal: {
+    id: "journal", label: "Journal", href: "/journal", screen: "/OtherAssets/DesignVideo.mp4",
+    stations: [p([-3.2, 3.4, 11], [1.4, 2.6, 0], 32), p([0, 3.2, 10], [0, 2.6, 0], 34)],
+  },
+  contact: {
+    id: "contact", label: "Contact", href: "/contact", screen: "/OtherAssets/contact.mp4",
+    stations: [p([2.6, 6, 8.2], [-1.2, 1.6, 2], 34), p([0, 4.5, 7.5], [0, 2.2, 1.5], 36)],
   },
 };
 
-export const ROOM_ORDER: RoomId[] = ["atrium", "gallery", "exhibit", "wings", "studio", "reading", "desk"];
+/** Menu and footer order. */
+export const NAV: SceneId[] = ["work", "services", "studio", "journal", "contact"];
 
-export const DOORS: Door[] = [
-  { a: "atrium", b: "desk", at: [0, 0, 15], w: 5, h: 4.5 },
-  { a: "atrium", b: "gallery", at: [15, 0, 0], w: 6, h: 6 },
-  { a: "gallery", b: "exhibit", at: [75, 0, 0], w: 5, h: 6 },
-  { a: "atrium", b: "wings", at: [-15, 0, 0], w: 6, h: 6 },
-  { a: "gallery", b: "studio", at: [25, 0, 6], w: 4, h: 4 },
-  { a: "wings", b: "reading", at: [-25, 0, 9], w: 4, h: 4 },
-];
-
-export function roomForPath(path: string): RoomId {
-  if (path.startsWith("/work/")) return "exhibit";
-  if (path.startsWith("/work")) return "gallery";
-  if (path.startsWith("/services")) return "wings";
-  if (path.startsWith("/studio")) return "studio";
-  if (path.startsWith("/journal")) return "reading";
-  if (path.startsWith("/contact")) return "desk";
-  return "atrium";
+export function sceneForPath(path: string): SceneId {
+  if (/^\/work\/.+/.test(path)) return "project";
+  for (const id of NAV) if (path.startsWith(SCENES[id].href)) return id;
+  return "home";
 }
-
-export const doorBetween = (a: RoomId, b: RoomId) => DOORS.find((d) => (d.a === a && d.b === b) || (d.a === b && d.b === a));
-
-/** Rooms to pass through, `from` and `to` included (breadth-first over the doors). */
-export function route(from: RoomId, to: RoomId): RoomId[] {
-  const prev = new Map<RoomId, RoomId | null>([[from, null]]);
-  const queue: RoomId[] = [from];
-  while (queue.length) {
-    const r = queue.shift()!;
-    if (r === to) break;
-    for (const d of DOORS) {
-      const n = d.a === r ? d.b : d.b === r ? d.a : null;
-      if (n && !prev.has(n)) { prev.set(n, r); queue.push(n); }
-    }
-  }
-  const out: RoomId[] = [];
-  for (let r: RoomId | null | undefined = to; r; r = prev.get(r)) out.unshift(r);
-  return out[0] === from ? out : [from];
-}
-
-export { VOID_MID };
