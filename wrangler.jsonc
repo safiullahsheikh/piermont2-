@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "behind-the-pixels",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "behind-the-pixels"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  },
+  "routes": [
+    { "pattern": "piermontstudios.com/*", "zone_name": "piermontstudios.com" },
+    { "pattern": "www.piermontstudios.com/*", "zone_name": "piermontstudios.com" },
+    { "pattern": "www.piermontstudios.com", "custom_domain": true }
+  ]
+}

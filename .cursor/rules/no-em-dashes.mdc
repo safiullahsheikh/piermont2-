@@ -1,0 +1,21 @@
+---
+description: Never use em dashes or en dashes in copy, UI text, comments, or titles
+alwaysApply: true
+---
+
+# No em dashes or en dashes
+
+Never use the em dash (`—`) or en dash (`–`) anywhere in this project: user-facing copy, metadata titles, aria labels, comments, or commit messages.
+
+## Use instead
+
+- Sentence breaks: comma, period, colon, or a spaced hyphen (` - `)
+- Ranges and dates: a regular hyphen (`1-2 weeks`, `Mon-Fri`)
+- Attribution: comma or spaced hyphen (`quote - Name`)
+
+## Examples
+
+- Bad: `The foundation of every project — how your brand looks`
+- Good: `The foundation of every project - how your brand looks`
+- Bad: `Process — From Brief to Launch`
+- Good: `Process - From Brief to Launch`
